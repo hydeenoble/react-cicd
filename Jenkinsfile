@@ -29,10 +29,6 @@ try {
             sh "npm install"
         }   
 
-        stage ('test') {
-            sh "npm test"
-        }
-
         if(isMaster || isStaging){
             def tag = isMaster ? "latest" : "staging"
             stage ('Build Docker Image') {
