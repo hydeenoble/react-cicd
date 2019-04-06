@@ -38,10 +38,10 @@ try {
             // stage ('Build Docker Image') {
             //     sh "docker build -t hydeenoble/turing-react:${tag} ."
             // }
-            
+
             stage ('Push Docker to Docker hub') {
                 echo HYDEE_DOCKER_PASS
-                sh "\$(echo ${HYDEE_DOCKER_PASS}) | docker login --username hydeenoble --password-stdin"
+                sh "docker login --username hydeenoble --password ${HYDEE_DOCKER_PASS}"
                 sh "docker push hydeenoble/turing-react:${tag}"
             }
 
