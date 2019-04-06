@@ -18,19 +18,29 @@ currentBuild.result = "SUCCESS"
 try {
     node {
         deleteDir()
+        env.NODEJS_HOME = "${tool 'Node 6.14.1'}"
+        env.PATH = "${env.NODEJS_HOME}/bin:${env.PATH}"
 
-        stage ('Checkout') {
+        stage ('checkout') {
             checkout scm
         }
 
+        // stage ('Install Dependencies') {
+        //     sh "npm install"
+        // }   
+
+        // stage ('test') {
+
+        // }
+
         if(isMaster || isStaging){
             def tag = isMaster ? "latest" : "staging"
-            stage ('Build Docker Image') {
-                sh "docker build -t hydeenoble/turing-react:${tag} ."
-            }
+            // stage ('Build Docker Image') {
+            //     sh "docker build -t hydeenoble/turing-react:${tag} ."
+            // }
             stage ('Push Docker to Docker hub') {
                 echo HYDEE_DOCKER_PASS
-                sh "\$(${HYDEE_DOCKER_PASS} | docker login --username hydeenoble --password-stdin)"
+                sh "\$(echo ${HYDEE_DOCKER_PASS}) | docker login --username hydeenoble --password-stdin"
                 sh "docker push hydeenoble/turing-react:${tag}"
             }
 
