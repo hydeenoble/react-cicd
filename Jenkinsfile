@@ -25,28 +25,27 @@ try {
             checkout scm
         }
 
-        // stage ('Install Dependencies') {
-        //     sh "npm install"
-        // }   
+        stage ('Install Dependencies') {
+            sh "npm install"
+        }   
 
-        // stage ('test') {
-
-        // }
+        stage ('test') {
+            sh "npm test"
+        }
 
         if(isMaster || isStaging){
             def tag = isMaster ? "latest" : "staging"
-            // stage ('Build Docker Image') {
-            //     sh "docker build -t hydeenoble/turing-react:${tag} ."
-            // }
+            stage ('Build Docker Image') {
+                sh "docker build -t hydeenoble/turing-react:${tag} ."
+            }
 
             stage ('Push Docker to Docker hub') {
-                echo HYDEE_DOCKER_PASS
                 sh "docker login --username hydeenoble --password ${HYDEE_DOCKER_PASS}"
                 sh "docker push hydeenoble/turing-react:${tag}"
             }
 
             stage ('Deploy to Kubernetes') {
-                redeploy(deploymentName, tag)
+                // redeploy(deploymentName, tag)
             }
 
             stage('Clean up'){
