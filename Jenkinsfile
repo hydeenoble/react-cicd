@@ -23,11 +23,7 @@ try {
 
         stage ('checkout') {
             checkout scm
-        }
-
-        stage ('Install Dependencies') {
-            sh "npm install"
-        }   
+        } 
 
         if(isMaster || isStaging){
             def tag = isMaster ? "latest" : "staging"
