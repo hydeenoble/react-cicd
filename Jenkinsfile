@@ -41,7 +41,7 @@ try {
             }
 
             stage ('Deploy to Kubernetes') {
-                redeploy(deploymentName, tag)
+                redeploy(deploymentName)
             }
 
             stage('Clean up'){
@@ -54,7 +54,7 @@ try {
     currentBuild.result = "FAILURE"
 }
 
-def redeploy(deploymentName, tag){
+def redeploy(deploymentName){
     try{
         withKubeConfig([credentialsId: 'KubeCliCredentialsId',
         serverUrl: K8S_SERVER_URL,
