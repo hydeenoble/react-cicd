@@ -1,0 +1,66 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+ labels:
+   com.terragonbase.service: react
+ name: react
+ namespace: test
+spec:
+ replicas: 1
+ template:
+   metadata:
+     labels:
+       com.terragonbase.service: react
+   spec:
+     containers:
+     - env: []
+       image: hydeenoble/turing-react:latest
+       name: react
+       imagePullPolicy: Always
+       ports:
+       - containerPort: 3000
+       resources: {}
+       stdin: true
+       tty: true
+     restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+ labels:
+   com.terragonbase.service: react
+ name: react
+ namespace: test
+spec:
+ type: NodePort
+ ports:
+ - name: "http"
+   port: 80
+   targetPort: 3000
+   protocol: TCP
+ - name: "https"
+   port: 443
+   targetPort: 3000
+   protocol: TCP
+ selector:
+   com.terragonbase.service: react
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: react
+  namespace: test
+  annotations:
+    kubernetes.io/ingress.class: "kong"
+spec:
+  rules:
+    - host: react.terragonbase.com
+      http:
+        paths:
+          - path: "/"
+            backend:
+              serviceName: react
+              servicePort: "http"

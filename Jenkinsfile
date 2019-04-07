@@ -3,6 +3,10 @@
 import java.util.Date
 import groovy.json.*
 
+def deploymentName = 'react'
+def imageName = 'turing-react'
+def dockerUser = 'hydeenoble'
+
 def isMaster = env.BRANCH_NAME == 'master'
 def isStaging = env.BRANCH_NAME == 'staging'
 def start = new Date()
@@ -28,20 +32,20 @@ try {
         if(isMaster || isStaging){
             def tag = isMaster ? "latest" : "staging"
             stage ('Build Docker Image') {
-                sh "docker build -t hydeenoble/turing-react:${tag} ."
+                sh "docker build -t ${dockerUser}/${imageName}:${tag} ."
             }
 
             stage ('Push Docker to Docker hub') {
-                sh "docker login --username hydeenoble --password ${HYDEE_DOCKER_PASS}"
-                sh "docker push hydeenoble/turing-react:${tag}"
+                sh "docker login --username ${dockerUser} --password ${HYDEE_DOCKER_PASS}"
+                sh "docker push ${dockerUser}/${imageName}:${tag}"
             }
 
             stage ('Deploy to Kubernetes') {
-                // redeploy(deploymentName, tag)
+                redeploy(deploymentName, tag)
             }
 
             stage('Clean up'){
-                sh "docker rmi hydeenoble/turing-react:${tag}"
+                sh "docker rmi ${dockerUser}/${imageName}:${tag}"
             }
         }
     }
@@ -54,7 +58,8 @@ def redeploy(deploymentName, tag){
     try{
         withKubeConfig([credentialsId: 'KubeCliCredentialsId',
         serverUrl: K8S_SERVER_URL,
-        clusterName: K8S_CLUSTER_NAME]){1
+        clusterName: K8S_CLUSTER_NAME]){
+            sh "kubectl apply -f kube.yaml"
             def patchArg = "{\"spec\":{\"template\":{\"metadata\":{\"labels\":{\"date\":\"\$(date +'%s')\"}}}}}"
             def output = JsonOutput.toJson(patchArg)
             sh "kubectl patch deployment ${deploymentName} -n test -p ${output}"
