@@ -1,4 +1,4 @@
-FROM node:latest
+FROM node:latest as react-build
 
 RUN mkdir -p /app
 
@@ -6,12 +6,17 @@ WORKDIR /app
 
 COPY .  /app
 
-RUN npm install -g serve
-
 RUN npm install
 
 RUN npm run build
 
-EXPOSE 5000
 
-CMD ["serve", "-s", "build"]
+FROM nginx:alpine
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
+COPY --from=react-build /app/build /usr/share/nginx/html
+
+EXPOSE 80
+
+CMD ["nginx", "-g", "daemon off;"]
